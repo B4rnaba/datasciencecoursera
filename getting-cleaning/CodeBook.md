@@ -12,17 +12,17 @@ output: html_document
 ##  1. Uploading the data from my working directory (previously downloaded and extracted)
 
 #Subjects
-subjects_train <- read.table ("./data/UCI HAR Dataset/train/subject_train.txt")
+subjects_train <- read.table ("./UCI HAR Dataset/train/subject_train.txt")
 #Activities
-activities_train <- read.table ("./data/UCI HAR Dataset/train/y_train.txt")
+activities_train <- read.table ("./UCI HAR Dataset/train/y_train.txt")
 #Indicator values (features)
-features_train <- read.table ("./data/UCI HAR Dataset/train/X_train.txt")
+features_train <- read.table ("./UCI HAR Dataset/train/X_train.txt")
 #Merging the data with 'cbind' function
 rawdata_train <- cbind(subjects_train, activities_train, features_train)
 #The same for the 'test' part of data
-subjects_test <- read.table ("./data/UCI HAR Dataset/test/subject_test.txt")
-activities_test <- read.table ("./data/UCI HAR Dataset/test/y_test.txt")
-features_test <- read.table ("./data/UCI HAR Dataset/test/X_test.txt")
+subjects_test <- read.table ("./UCI HAR Dataset/test/subject_test.txt")
+activities_test <- read.table ("./UCI HAR Dataset/test/y_test.txt")
+features_test <- read.table ("./UCI HAR Dataset/test/X_test.txt")
 rawdata_test <- cbind(subjects_test, activities_test, features_test)
 
 ##   2. Joining data from two parts of the study (Point 1 in Assignment Task)
@@ -36,7 +36,7 @@ rm(activities_test, activities_train, features_test,
 #Making vector with first 2 column names:
 first2_variable_names <- c("subjects","activities")
 #All other names are extracted from 'features.txt' file
-feature_names <- read.table("./data/UCI HAR Dataset/features.txt")
+feature_names <- read.table("./UCI HAR Dataset/features.txt")
 #Converting DF with feature names into character vector
 feature_names_vector <- as.vector(feature_names[,2])
 #Joining both vectors to obtain complete list of variables
