@@ -1,0 +1,121 @@
+---
+title: "Machine Learning - Course Project"
+author: "Barnaba Danieluk"
+date: "21 August 2015"
+---
+
+Uploading necessary packages
+
+```{r message=FALSE, warning=FALSE}
+library(caret)
+library(rpart)
+library(rattle)
+```
+
+Uploading training and testing data sets and defining missing values
+
+```{r}
+training <- read.csv("pml-training.csv", na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv("pml-testing.csv", na.strings=c("NA","#DIV/0!",""))
+```
+
+There is **19622** cases and **160** variables in training sample
+
+```{r}
+dim(training)
+```
+
+###Preprocessing
+
+Removing irrelevant variables (first 7 columns)
+
+```{r}
+training <- training[,8:160]
+```
+
+Removing variables with over 19,000 NA's (out of 19,622 sample)
+
+```{r}
+NA_indicator <- NULL
+for (i in 1:153){
+  sum_na <- sum(is.na(training[,i]))
+    if (sum_na > 19000) {
+      NA_indicator <- c(NA_indicator,i)
+    }
+}
+training <- training[,-NA_indicator]
+```
+
+Removing near zero covariates (there wasn't any)
+
+```{r}
+zero_cov <- nearZeroVar (training,saveMetrics=TRUE)
+training <- training[,zero_cov$nzv == FALSE]
+```
+
+###Data splitting
+
+Instead of making k-fold cross-validation manually with *createFolds* function
+I used *trainControl* function to specify the type of resampling. I have chosen
+cross-validation (cv) method with **10 folds** (I wanted to balance beetween 
+variability and bias)
+
+```{r}
+fitControl <- trainControl(method="cv", number=10)
+```
+
+###Model Building
+
+Building prediction function with all the predictors using **Random Forest**
+(rf) using previously defined k-fold cross-validation resampling (trControl)
+
+```{r}
+set.seed(12345)
+model <- train (classe ~ ., method="rf", data=training, ntree=100,
+                trControl=fitControl)
+```
+
+The obtained model is well-fitted (low estimated error rate) to training
+data set
+
+```{r}
+model$finalModel
+```
+
+###Checking the model
+
+Lets check how well my model predicts the manner in which subjects did the exercise.
+
+```{r}
+prediction_train <- predict(model, training)
+table (prediction_train, training$classe)
+```
+
+As You can see, all cases were predicted perfectly. It could mean that my model is
+a little bit overestimated, but the risk is rather low, because I used 10 folds
+and as many as 100 trees in algoritm, so this result shouldn't be biased by specificity
+of training set. So I expect out of sample error to be relatively low.
+
+###Getting Answers (Prediction)
+
+Now its time to predict "classe" values in testing set to obtain answers for an assignment
+
+```{r}
+answers <- predict(model, testing)
+answers
+```
+
+So I got the answers but now I need to convert R object to files in order to submit it on the
+Coursera page. First I changed format, than I used an algoritm from assignment description
+
+```{r}
+answers <- as.character(answers)
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+pml_write_files(answers)
+```
